@@ -256,28 +256,28 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     visited.append(start)
 
     while not queue.isEmpty():
-       popped = queue.pop()
-       #print "popped is : ", popped
-       vertex = popped[0]
-       path = popped[1]
-       #heurCost = heuristic(vertex,problem)
-       #print "V is : ", vertex
-       #print "Heur is : ", heurCost
+        popped = queue.pop()
+        #print "popped is : ", popped
+        vertex = popped[0]
+        path = popped[1]
+        #heurCost = heuristic(vertex,problem)
+        #print "V is : ", vertex
+        #print "Heur is : ", heurCost
 
-       if problem.isGoalState(vertex):
-	       break
+        if problem.isGoalState(vertex):
+            break
 
-       for node in problem.getSuccessors(vertex):
-           state, action = node[0], node[1]
-	   subPath = list(path)
+        for node in problem.getSuccessors(vertex):
+            state, action = node[0], node[1]
 
-	   if state not in visited:
-              visited.append(state)
-	      subPath.append(action)
-	      queue.push( (state, subPath), heuristic(state,problem) )
-	      #queue.push( (state, subPath), heurCost )
+        subPath = list(path)
 
-		    
+        if state not in visited:
+            visited.append(state)
+            subPath.append(action)
+            queue.push( (state, subPath), heuristic(state,problem) )
+            #queue.push( (state, subPath), heurCost )
+
     #print "Path is : ", path
     
     return path
