@@ -206,9 +206,7 @@ def uniformCostSearch(problem):
     visited.append(start)
 
     while not queue.isEmpty():
-
         poping = queue.pop()
-
         vertex, path, cost = poping[0], poping[1], poping[2]
 
         #print "vertex : ", vertex
@@ -220,9 +218,7 @@ def uniformCostSearch(problem):
             break
 
         for node in problem.getSuccessors(vertex):
-
             state, action, stepCost = node[0], node[1], node[2]
-
             subPath = list(path)
 
             if state not in visited:
@@ -251,15 +247,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     
     queue = util.PriorityQueue()
     visited = [] 
-    #print "State is : ", start
-    queue.push( (start, []), heuristic(start,problem) )
+    # ((vertex, path, cost), priority)
+    queue.push( (start, [], 0), 0)
     visited.append(start)
 
     while not queue.isEmpty():
         popped = queue.pop()
         #print "popped is : ", popped
-        vertex = popped[0]
-        path = popped[1]
+        vertex, path, cost = popped
         #heurCost = heuristic(vertex,problem)
         #print "V is : ", vertex
         #print "Heur is : ", heurCost
@@ -268,15 +263,15 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             break
 
         for node in problem.getSuccessors(vertex):
-            state, action = node[0], node[1]
+            state, action, stepCost = node
+            subPath = list(path)
 
-        subPath = list(path)
-
-        if state not in visited:
-            visited.append(state)
-            subPath.append(action)
-            queue.push( (state, subPath), heuristic(state,problem) )
-            #queue.push( (state, subPath), heurCost )
+            if state not in visited:
+                visited.append(state)
+                subPath.append(action)
+                gn_cost = cost+stepCost
+                fn_cost = gn_cost+heuristic(state, problem)
+                queue.push((state, subPath, gn_cost), fn_cost)
 
     #print "Path is : ", path
     
