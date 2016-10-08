@@ -367,21 +367,47 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     #*** YOUR CODE HERE ***
-    (x1, y1), visited_corners = state
+    src, visited_corners = state
     minScore = 99999
 
     # manhatten distance
     # return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
-    for corner in corners:
-        if corner not in visited_corners:
-            (x2, y2) = corner
-            distance = (abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2 ) ** 0.5
-            # distance =  abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-            if distance < minScore:
-                minScore = distance
+    total_dist = 0
+    unvisit_corners = [ c for c in corners if c not in visited_corners]
+    while unvisit_corners:
+        nextsrc, dist = findClosest(src, unvisit_corners)
+        total_dist += dist
+        unvisit_corners.remove(nextsrc)
+        src = nextsrc
 
-    return minScore # Default to trivial solution
+    return total_dist
+
+def findClosest(start, dest_list):
+    """
+    provide a pos, and a list of other pos
+    where pos is (x_pos, y_pos) on a grid
+
+    return
+    closest pos to start and its distance
+    """
+    if not dest_list:
+        print "Cannot prccess empty list"
+        return (None, 0)
+
+    (x1, y1) = start
+    e_distance = lambda (x1, y1), (x2, y2): (abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2 ) ** 0.5
+
+    min = 99999
+    min_pos = None
+    for pos in dest_list:
+        x2, y2 = pos
+        dist = e_distance((x1,y1), (x2,y2))
+        if dist < min:
+            min = dist
+            min_pos = pos
+
+    return (min_pos, min)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
