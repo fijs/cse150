@@ -368,10 +368,6 @@ def cornersHeuristic(state, problem):
 
     #*** YOUR CODE HERE ***
     src, visited_corners = state
-    minScore = 99999
-
-    # manhatten distance
-    # return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
     total_dist = 0
     unvisit_corners = [ c for c in corners if c not in visited_corners]
