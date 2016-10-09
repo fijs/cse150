@@ -522,17 +522,6 @@ def foodHeuristic(state, problem):
         uneatenFood.remove(nextsrc)
         position = nextsrc
 
-    """while uneatenFood:
-        #nextsrc, dist = findClosest(position, uneatenFood)
-        dist = mazeDistance(position, uneatenFood[0], problem.getStartingGameState())
-        #distance += dist
-        #need to do something to the foodList here
-        uneatenFood.pop(0)
-        #uneatenFood.remove(nextsrc)
-        #position = nextsrc
-        if dist < distance:
-            distance = dist"""
-
     return distance
     
 
