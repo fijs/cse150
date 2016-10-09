@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import itertools
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -504,13 +505,30 @@ def foodHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     #use foodGrid.asList() to pass into findClosest()
 
-    distance = 0
-    #distance = 99999
-    uneatenFood = foodGrid.asList()
-    
+    uneatenFood = list(foodGrid.asList())
+
+    h_list = []
+
+    h_list.append(eat_closest_distance(position, uneatenFood))
     #print "FoodList : ", uneatenFood
     #food is not eaten here
-    
+    numFood = min(len(uneatenFood), 5)
+    food_list = []
+
+    for i in range(numFood):
+        next_food, _ = findClosest(position, uneatenFood)
+        food_list.append(next_food)
+        uneatenFood.remove(next_food)
+
+    h_list.append(find_shortestPath(position, food_list))
+    return max(h_list)
+
+def eat_closest_distance(position, uneatenFood):
+    if not uneatenFood:
+        return 0
+
+    distance = 0
+    total_len = len(uneatenFood)
     while uneatenFood:
         nextsrc, dist = findClosest(position, uneatenFood)
         distance += dist
@@ -518,8 +536,33 @@ def foodHeuristic(state, problem):
         uneatenFood.remove(nextsrc)
         position = nextsrc
 
-    return distance
-    
+    return distance/total_len
+
+def find_shortestPath(src, dest_list):
+    """
+    :param src: coordinate
+    :param dest_list: other food coordinates
+    :return: shortest path traveling through the other coordinates
+    """
+    if not dest_list:
+        return 0
+
+    total_len = len(uneatenFood)
+    comb_list = itertools.permutations(dest_list, len(dest_list))
+    e_distance = lambda (x1, y1), (x2, y2): (abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2 ) ** 0.5
+
+    min_dist = 99999
+    for l in comb_list:
+        dist = 0
+        curr = src
+        for target in l:
+            dist += e_distance(curr, target)
+            curr = target
+        if dist < min_dist:
+            min_dist = dist
+
+    return min_dist/total_len
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
