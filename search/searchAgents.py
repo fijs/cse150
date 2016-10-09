@@ -532,17 +532,7 @@ def foodHeuristic(state, problem):
         #position = nextsrc
         if dist < distance:
             distance = dist"""
-    """closestDistance = 0
-    for food in foodGrid.asList():
-        pos1 = food
-        pos2 = position
-        distance = abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
-        if distance > closestDistance:
-            closestDistance = distance"""
-    
-
-        #return total_dist
     return distance
     
 
