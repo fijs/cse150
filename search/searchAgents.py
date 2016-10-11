@@ -509,18 +509,22 @@ def foodHeuristic(state, problem):
 
     h_list = []
 
-    h_list.append(eat_closest_distance(position, uneatenFood))
+    #h_list.append(eat_closest_distance(position, uneatenFood))
+    h_list.append(foodMazeDistance(position, uneatenFood,
+          problem.getStartingGameState()))
     #print "FoodList : ", uneatenFood
     #food is not eaten here
+    """
     numFood = min(len(uneatenFood), 5)
     food_list = []
-
+ 
     for i in range(numFood):
         next_food, _ = findClosest(position, uneatenFood)
         food_list.append(next_food)
         uneatenFood.remove(next_food)
+    """
 
-    h_list.append(find_shortestPath(position, food_list))
+    #h_list.append(find_shortestPath(position, food_list))
     return max(h_list)
 
 def eat_closest_distance(position, uneatenFood):
@@ -535,8 +539,44 @@ def eat_closest_distance(position, uneatenFood):
         #need to do something to the foodList here
         uneatenFood.remove(nextsrc)
         position = nextsrc
+    
+    return distance
+    #print "Distance : ", distance
+    #return distance/(total_len)
 
-    return distance/total_len
+"""
+Finds two farthest foods from pacman src position,
+then go to the closer of the two
+"""
+def foodMazeDistance(src, uneatenFood, gameState):
+    if not uneatenFood:
+       return 0
+
+    distance = 0
+    #dist_a, dist_b is farthest point and second farthest
+    for food in uneatenFood:
+       #gameState only needed for walls
+       dist = mazeDistance(src, food, gameState)
+       if dist > distance:
+          distance = dist
+       pos_a = food
+    dist_a = distance
+    
+    if len(uneatenFood) == 1:
+       return dist_a
+
+    distance = 0
+    for food in uneatenFood:
+       #gameState only needed for walls
+       dist = mazeDistance(src, food, gameState)
+       if dist > distance and dist <= dist_a:
+          distance = dist
+       pos_b = food
+    dist_b = distance
+
+    dist_ab = mazeDistance(pos_a, pos_b, gameState)
+     
+    return dist_ab + dist_b
 
 def find_shortestPath(src, dest_list):
     """
@@ -547,7 +587,8 @@ def find_shortestPath(src, dest_list):
     if not dest_list:
         return 0
 
-    total_len = len(uneatenFood)
+    #total_len = len(uneatenFood)
+    total_len = len(dest_list)
     comb_list = itertools.permutations(dest_list, len(dest_list))
     e_distance = lambda (x1, y1), (x2, y2): (abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2 ) ** 0.5
 
