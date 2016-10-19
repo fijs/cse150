@@ -13,10 +13,11 @@
 
 
 from util import manhattanDistance
-from game import Directions
+from game import Directions 
 import random, util
 
 from game import Agent
+
 
 class ReflexAgent(Agent):
     """
@@ -66,15 +67,51 @@ class ReflexAgent(Agent):
         Print out these variables to see what you're getting, then combine them
         to create a masterful evaluation function.
         """
+        #newGhostStates = successorGameState.getGhostStates()
+        #newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        #Variables to keep score of the move and a constant for distance tolerance
+        #to the ghost as well  as initial values for food and ghost distance
+        score, tolerance =  0, 3
+        foodDistance = ghostDistance = 9999
+
+        #If moving to this state gives us a food count of zero, give it top value
+        if successorGameState.getNumFood() == 0:
+            return 9999
+
+        #Get ghost positions and calculate the distance to the closest ghost
+        for ghostPosition in successorGameState.getGhostPositions():
+          ghostDistance = min(ghostDistance, manhattanDistance(newPos,ghostPosition))
+
+        #Add the ghost distance to the score. States with longer distances to the 
+        #ghosts should be prioritized
+        #score += ghostDistance
+        
+        #Check that the closest ghost position is less than the tolerance
+        if ghostDistance < tolerance:
+            #If moving to a position results in death, give it bottom value
+            if ghostDistance == 0:
+                return -9999
+
+        #If moving to this position results in eating food, increase score
+        if successorGameState.getNumFood() < currentGameState.getNumFood():
+            score += 1
+        
+        #Find the closest food dot available
+        for foodPosition in newFood.asList():
+          foodDistance = min(foodDistance, manhattanDistance(newPos,foodPosition))
+
+        #Add the inverse of the min distance to food to the score. The smaller the distance,
+        #the greater the score.
+        score += 1./foodDistance
+
+        return score
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -167,6 +204,7 @@ def betterEvaluationFunction(currentGameState):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 # Abbreviation
 better = betterEvaluationFunction

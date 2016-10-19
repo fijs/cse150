@@ -17,6 +17,9 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from search import PositionSearchProblem
+from search import breadthFirstSearch
+
 from game import Directions
 import util
 
