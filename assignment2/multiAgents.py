@@ -49,7 +49,8 @@ class ReflexAgent(Agent):
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
         "Add more of your code here if you want to"
-
+        #print "bestScore ", bestScore
+        #print "legalMove ", legalMoves[chosenIndex]
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -77,7 +78,7 @@ class ReflexAgent(Agent):
 
         #Variables to keep score of the move and a constant for distance tolerance
         #to the ghost as well  as initial values for food and ghost distance
-        score, tolerance =  0, 3
+        score =  0
         foodDistance = ghostDistance = 9999
 
         #If moving to this state gives us a food count of zero, give it top value
@@ -93,14 +94,20 @@ class ReflexAgent(Agent):
         #score += ghostDistance
         
         #Check that the closest ghost position is less than the tolerance
-        if ghostDistance < tolerance:
-            #If moving to a position results in death, give it bottom value
-            if ghostDistance == 0:
-                return -9999
+        
+        #If moving to a position results in death, give it bottom value
+        if ghostDistance == 0:
+            return -9999
 
+        #keeping away from ghost rewarded
+        #prevents ghost from jumping onto pacman
+        if ghostDistance > 1:
+            score += 10
+        
+         
         #If moving to this position results in eating food, increase score
         if successorGameState.getNumFood() < currentGameState.getNumFood():
-            score += 1
+            score += 100
         
         #Find the closest food dot available
         for foodPosition in newFood.asList():
