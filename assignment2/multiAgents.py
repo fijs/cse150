@@ -17,6 +17,8 @@ from game import Directions
 import random, util
 import sys
 
+DEBUG = False
+
 from game import Agent
 
 
@@ -174,12 +176,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        score = self.max_value(gameState, 0, 0)
         max = -sys.maxint - 1
         best_action = None
         for action in gameState.getLegalActions(0):
             successor = gameState.generateSuccessor(0, action)
-            res_score = self.min_value(successor, 1, 0)
+            res_score = self.value(successor, 1, 1)
+            debug("action: {}, res_score: {}".format(action, res_score))
             if res_score > max:
                 max = res_score
                 best_action = action
@@ -187,23 +189,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return best_action
 
     def max_value(self, gameState, agentIndex, depth):
-        max_val = -sys.maxint - 1
+        max_val = (-sys.maxint) - 1
         for action in gameState.getLegalActions(agentIndex):
             successor = gameState.generateSuccessor(agentIndex, action)
             max_val = max(max_val, self.value(successor, agentIndex+1, depth))
+            debug("max_val: action: {}, max_val: {}".format(action, max_val))
         return max_val
 
     def min_value(self, gameState, agentIndex, depth):
         min_val = sys.maxint
         for action in gameState.getLegalActions(agentIndex):
             successor = gameState.generateSuccessor(agentIndex, action)
-            min_val = min(max, self.value(successor, agentIndex+1, depth))
+            min_val = min(min_val, self.value(successor, agentIndex+1, depth))
+            debug("min_value: action: {}, min_val: {}".format(action, min_val))
         return min_val
 
     def value(self, gameState, agentIndex, depth):
         totalAgent = gameState.getNumAgents()
+        if gameState.isWin() or gameState.isLose():
+            return gameState.getScore()
+
+        # debug functions
+        debug("value function")
+        debug("agentindex is: {}, depth is: {}, self.depth is: {}".format(
+            agentIndex, depth, self.depth
+        ))
+
         if agentIndex == totalAgent:
             if depth == self.depth:
+                debug("max depth, util: {}".format(self.evaluationFunction(gameState)))
                 return self.evaluationFunction(gameState)
             else:
                 depth += 1
@@ -213,6 +227,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return self.min_value(gameState, agentIndex, depth)
         else:
             return self.max_value(gameState, agentIndex, depth)
+
+def debug(string):
+    if DEBUG:
+        print string
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
