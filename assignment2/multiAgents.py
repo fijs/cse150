@@ -378,8 +378,79 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information you can extract from a GameState (pacman.py)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
 
+    #Variables to keep score of the move and a constant for distance tolerance
+    #to the ghost as well  as initial values for food and ghost distance
+    score =  0
+    foodDistance = ghostDistance = 9999
+
+    #If moving to this state gives us a food count of zero, give it top value
+    if currentGameState.getNumFood() == 0:
+        return 9999
+
+    #Get ghost positions and calculate the distance to the closest ghost
+    for ghostPosition in currentGameState.getGhostPositions():
+       ghostDistance = min(ghostDistance,
+           manhattanDistance(newPos,ghostPosition))
+
+    #Check that the closest ghost position is less than the tolerance
+        
+    #If moving to a position results in death, give it bottom value
+    if ghostDistance == 0:
+        return -9999
+
+    #keeping away from ghost rewarded
+    #prevents ghost from jumping onto pacman
+    if ghostDistance > 1:
+        score += 10
+      
+    #If moving to this position results in eating food, increase score
+    score += (1./currentGameState.getNumFood()) * 10
+       
+    newScaredTimes = 0
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [newScaredTimes + ghostState.scaredTimer for ghostState in newGhostStates]
+    # print "Scared time, ", newScaredTimes
+    #Find the closest food dot available
+    for foodPosition in newFood.asList():
+      foodDistance = min(foodDistance, manhattanDistance(newPos,foodPosition))
+    #Add the inverse of the min distance to food to the score. The smaller the distance,
+    #the greater the score.
+    #if newScaredTimes > 0:
+        #score += (1./foodDistance) * 100
+    #else:
+    score += (1./foodDistance)
+    
+   
+    return score
+
+
+
+def mazeDistance(point1, point2, gameState):
+    """
+    Returns the maze distance between any two points, using the search functions
+    you have already built. The gameState can be any game state -- Pacman's
+    position in that state is ignored.
+
+    Example usage: mazeDistance( (2,4), (5,6), gameState)
+
+    This might be a useful helper function for your ApproximateSearchAgent.
+    """
+    x1, y1 = point1
+    x2, y2 = point2
+    
+    x2 = int(x2)
+    y2 = int(y2)
+    print "point1 is , ", point1
+    print "point2 is , ", point2
+    walls = gameState.getWalls()
+    assert not walls[x1][y1], 'point1 is a wall: ' + str(point1)
+    assert not walls[x2][y2], 'point2 is a wall: ' + str(int(point2))
+    prob = PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)
+    return len(search.bfs(prob))
 
 # Abbreviation
 better = betterEvaluationFunction
