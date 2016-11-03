@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
+import p1_is_complete as p1
+import p2_is_consistent as p2 
 
 def select_unassigned_variable(csp):
     """Selects the next unassigned variable, or None if there is no more unassigned variables
@@ -21,6 +22,8 @@ def order_domain_values(csp, variable):
 
 def inference(csp, variable):
     """Performs an inference procedure for the variable assignment.
+
+    Note: domain = variable.domain
 
     For P3, *you do not need to modify this method.*
     """
@@ -47,8 +50,29 @@ def backtrack(csp):
     If there is a solution, this method returns True; otherwise, it returns False.
     """
 
-    # TODO implement this
-    pass
+    
+    if p1.is_complete(csp):
+        return True
+    else:
+        var = select_unassigned_variable(csp)
+        for value in order_domain_values(csp,var):
+            csp.variables.begin_transaction()
+            if p2.is_consistent(csp,var,value):
+                var.assign(value)
+                inferences = inference(csp,var)
+                if inferences:
+                    #add inferences to assignment
+                    if backtrack(csp):
+                        return True
+            csp.variables.rollback()
+        return False
+
+
+                    
+
+
+        
+    
 
 
 
