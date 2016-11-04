@@ -11,7 +11,6 @@ def select_unassigned_variable(csp):
     """
     return next((variable for variable in csp.variables if not variable.is_assigned()))
 
-
 def order_domain_values(csp, variable):
     """Returns a list of (ordered) domain values for the given variable.
 
@@ -66,13 +65,4 @@ def backtrack(csp):
                         return True
             csp.variables.rollback()
         return False
-
-
-                    
-
-
-        
-    
-
-
 
