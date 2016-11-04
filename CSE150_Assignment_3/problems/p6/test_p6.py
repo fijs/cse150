@@ -6,8 +6,8 @@
 import os
 import sys
 ####While testing individual files you may need to add these lines###
-#sys.path.append('../../src')
-#sys.path.append('../../solutions')
+sys.path.append('../../src')
+sys.path.append('../../solutions')
 ###########
 from assignment3 import *
 

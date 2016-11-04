@@ -24,7 +24,7 @@ def ac3(csp, arcs=None):
     all_constraints = csp.constraints
 
     while queue_arcs:
-        var1, var2 = queue_arcs.popleft()
+        var1, var2 = queue_arcs.pop()
         curr_constraints = all_constraints[var1, var2]
         inconsistent = []
         for val1 in var1.domain:
@@ -35,7 +35,7 @@ def ac3(csp, arcs=None):
             var1.domain = [ val for val in var1.domain if val not in inconsistent ]
             if not var1.domain:
                 return False
-            incoming_arcs = [ constraint._flip() for constraint in all_constraints[var1]
+            incoming_arcs = [ (constraint._flip().var1, constraint._flip().var2) for constraint in all_constraints[var1]
                               if constraint not in all_constraints[var1, var2]]
             for arc in incoming_arcs:
                 queue_arcs.append(arc)

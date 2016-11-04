@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 
-import sys
-
 def select_unassigned_variable(csp):
     """Selects the next unassigned variable, or None if there is no more unassigned variables
     (i.e. the assignment is complete).

@@ -48,8 +48,6 @@ def backtrack(csp):
 
     If there is a solution, this method returns True; otherwise, it returns False.
     """
-
-    
     if p1.is_complete(csp):
         return True
     else:
