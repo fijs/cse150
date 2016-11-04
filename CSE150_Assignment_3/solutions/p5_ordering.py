@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 import sys
 
@@ -31,8 +32,6 @@ def select_unassigned_variable(csp):
     return var
        
 
-
-
 def order_domain_values(csp, variable):
     """Returns a list of (ordered) domain values for the given variable.
 
@@ -42,6 +41,34 @@ def order_domain_values(csp, variable):
     """
 
     # TODO implement this
-    
-    #for value in variable.domain
-    pass   
+    all_constraints = csp.constraints
+    curr_constraints = csp.constraints[variable]
+
+    constraint_list = []
+    for val in variable.domain:
+        num_mismatch = 0
+        for constraint in curr_constraints:
+            var2 = constraint.var2
+            num_mismatch += count_value_mismatch(all_constraints[variable, var2], val, var2)
+        constraint_list.append((val, num_mismatch))
+
+    sorted_list = sorted(constraint_list, key=lambda tup: tup[1])
+    result = [tup[0] for tup in sorted_list]
+
+    return result
+
+
+def count_value_mismatch(constraints, val1, var2):
+    mismatch = 0
+    for val2 in var2.domain:
+        if not check_constraints(constraints, val1, val2):
+            mismatch += 1
+
+    return mismatch
+
+def check_constraints(constraints, val1, val2):
+    for constraint in constraints:
+        if not constraint.is_satisfied(val1, val2):
+            return False
+
+    return True
