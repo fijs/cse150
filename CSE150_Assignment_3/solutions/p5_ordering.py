@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 def select_unassigned_variable(csp):
     """Selects the next unassigned variable, or None if there is no more unassigned variables
     (i.e. the assignment is complete).
@@ -11,7 +13,23 @@ def select_unassigned_variable(csp):
     """
 
     # TODO implement this
-    pass
+    mrv = sys.maxint
+    var = None
+    for variable in csp.variables:
+       if not variable.is_assigned():
+          if len(variable.domain) < mrv:
+              var = variable
+              mrv = len(variable.domain)
+          if len(variable.domain) == mrv:
+              constraint_variable = [constraint for constraint in csp.constraints[variable] if
+      not constraint.var2.is_assigned()]
+              constraint_var = [constraint for constraint in csp.constraints[var] if not
+      constraint.var2.is_assigned()]
+              if len(constraint_variable) > len(constraint_var):
+                 var = variable
+                 
+    return var
+       
 
 
 
@@ -24,4 +42,6 @@ def order_domain_values(csp, variable):
     """
 
     # TODO implement this
-    pass
+    
+    #for value in variable.domain
+    pass   
