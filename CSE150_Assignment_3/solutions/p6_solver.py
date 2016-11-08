@@ -20,6 +20,7 @@ def backtracking_search(csp):
 
     For P6, *you do not need to modify this method.*
     """
+    ac3(csp)
     if backtrack(csp):
         return csp.assignment
     else:
@@ -148,18 +149,20 @@ def select_unassigned_variable(csp):
     # TODO implement this
     mrv = sys.maxint
     var = None
+
     for variable in csp.variables:
-       if not variable.is_assigned():
-          if len(variable.domain) < mrv:
-              var = variable
-              mrv = len(variable.domain)
-          if len(variable.domain) == mrv:
-              constraint_variable = [constraint for constraint in csp.constraints[variable] if
-      not constraint.var2.is_assigned()]
-              constraint_var = [constraint for constraint in csp.constraints[var] if not
-      constraint.var2.is_assigned()]
-              if len(constraint_variable) > len(constraint_var):
-                 var = variable
+        var_len = len(variable.domain)
+        if not variable.is_assigned():
+            if var_len == mrv:
+                constraint_variable = [constraint for constraint in csp.constraints[variable]
+                                       if not constraint.var2.is_assigned()]
+                constraint_var = [constraint for constraint in csp.constraints[var]
+                                  if not constraint.var2.is_assigned()]
+                if len(constraint_variable) > len(constraint_var):
+                    var = variable
+            elif var_len < mrv:
+                var = variable
+                mrv = var_len
 
     return var
 

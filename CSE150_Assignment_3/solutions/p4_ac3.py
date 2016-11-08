@@ -19,8 +19,6 @@ def ac3(csp, arcs=None):
 
     # TODO implement this
 
-    # print queue_arcs
-    # list of variables
     all_constraints = csp.constraints
 
     while queue_arcs:
@@ -38,7 +36,8 @@ def ac3(csp, arcs=None):
             incoming_arcs = [ (constraint._flip().var1, constraint._flip().var2) for constraint in all_constraints[var1]
                               if constraint not in all_constraints[var1, var2]]
             for arc in incoming_arcs:
-                queue_arcs.append(arc)
+                if not arc in queue_arcs:
+                    queue_arcs.append(arc)
 
     return True
 
