@@ -5,6 +5,7 @@
 """
 import os
 import sys
+import time
 ####While testing individual files you may need to add these lines###
 sys.path.append('../../src')
 sys.path.append('../../solutions')
@@ -17,7 +18,10 @@ def run_code_from(python_file, input_text):
     module = __import__(os.path.splitext(os.path.basename(python_file))[0])
     solve_method = getattr(module, 'backtracking_search')
     game = XSudoku(input_text)
+    start = time.time()
     game.solve_with(solve_method)
+    end = time.time()
+    print "Time taken: {}".format(end - start)
     return str(game)
 
 
