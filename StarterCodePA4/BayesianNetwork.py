@@ -94,6 +94,14 @@ class BayesianNetwork(object):
 
         return top_order
 
+    def print_variable(self, top_order):
+        """
+        testing whether top order was correct
+        :param top_order: list of node in topological order
+        :return: nothing
+        """
+        for node in top_order:
+            print node.variable.getName()
 
     #
     #     * Returns an estimate of P(queryVal=true|givenVars) using rejection sampling
@@ -105,28 +113,46 @@ class BayesianNetwork(object):
         """ generated source for method performRejectionSampling """
         #  TODO
         curr_num_sample = 0
-        num_queue_sample = 0
+        num_query_sample = 0
         top_order = self.get_topological_order()
+        queryVar_name = queryVar.getName()
 
         while(curr_num_sample < numSamples):
             # sample each variable topologically
             # if the sampled evidence var does not match givenVars, reject
             # flip coin based on cpt, p(x|parents(x))
+            assign = True
             assignment = {}
             for node in top_order:
+                var_name = node.variable.getName()
                 true_prob = node.getProbability(assignment, True)
                 node_sample_prob = random.random()
-                if node_sample_prob < true_prob:
-                    assignment[node] = False
+                if node_sample_prob <= true_prob:
+                    assignment[var_name] = True
                 else:
-                    assignment[node] = True
+                    assignment[var_name] = False
 
-                if node in givenVars:
-                    if assignment[node] != givenVars[node]:
-                        continue
+                if node.variable in givenVars:
+                    if assignment[var_name] != givenVars[node.variable]:
+                        assign = False
+                        break
 
+                # print "node {}".format(node.variable.getName())
+                # print "true prob: {}",format(true_prob)
+                # print "sample_prob: {}".format(node_sample_prob)
+                # print assignment
 
-        return 0
+            if assign:
+                curr_num_sample += 1
+                if assignment[queryVar_name]:
+                    num_query_sample += 1
+
+        res = (num_query_sample*1.0)/curr_num_sample
+        print "number of query sample: {}".format(num_query_sample)
+        print "total sample: {}".format(curr_num_sample)
+        print "res: {}".format(res)
+
+        return res
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using weighted sampling
