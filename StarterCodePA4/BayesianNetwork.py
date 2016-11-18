@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 """ generated source for module BayesianNetwork """
 from Assignment4 import *
-# 
+import random
+import Queue
+
+#
 #  * A bayesian network
 #  * @author Panqu
 #  
@@ -72,7 +75,27 @@ class BayesianNetwork(object):
             probList.append(probability)
         self.varMap.get(variable).setProbabilities(probList)
 
-    # 
+
+    def get_topological_order(self):
+        top_order = []
+        queue = Queue.Queue()
+
+        for node in self.rootNodes:
+            queue.put(node)
+
+        while not queue.empty():
+            node = queue.get()
+            if node in top_order:
+                top_order.remove(node)
+            top_order.append(node)
+
+            for child in node.children:
+                queue.put(child)
+
+        return top_order
+
+
+    #
     #     * Returns an estimate of P(queryVal=true|givenVars) using rejection sampling
     #     * @param queryVar Query variable in probability query
     #     * @param givenVars A list of assignments to variables that represent our given evidence variables
@@ -81,6 +104,28 @@ class BayesianNetwork(object):
     def performRejectionSampling(self, queryVar, givenVars, numSamples):
         """ generated source for method performRejectionSampling """
         #  TODO
+        curr_num_sample = 0
+        num_queue_sample = 0
+        top_order = self.get_topological_order()
+
+        while(curr_num_sample < numSamples):
+            # sample each variable topologically
+            # if the sampled evidence var does not match givenVars, reject
+            # flip coin based on cpt, p(x|parents(x))
+            assignment = {}
+            for node in top_order:
+                true_prob = node.getProbability(assignment, True)
+                node_sample_prob = random.random()
+                if node_sample_prob < true_prob:
+                    assignment[node] = False
+                else:
+                    assignment[node] = True
+
+                if node in givenVars:
+                    if assignment[node] != givenVars[node]:
+                        continue
+
+
         return 0
 
     # 
