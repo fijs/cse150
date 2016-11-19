@@ -41,7 +41,7 @@ class CloudyNetwork(object):
         given1 = {}
         given1[rain]= True
         given1[cloudy]=True
-        print("rejection sampling: " +str(cloudnet.performRejectionSampling(wetGrass, given1, 999999)))
+        #print("rejection sampling: " +str(cloudnet.performRejectionSampling(wetGrass, given1, 999999)))
         print("weighted sampling: " + str(cloudnet.performWeightedSampling(wetGrass, given1, 99999)))
         print("gibbs sampling: " + str(cloudnet.performGibbsSampling(wetGrass, given1, 99999)))
         #  P(Rain=1|Sprinkler=1) = TODO in writeup
@@ -49,7 +49,7 @@ class CloudyNetwork(object):
         given2 = {}
         given2[rain]=True
         print("weighted sampling: " + str(cloudnet.performWeightedSampling(sprinkler, given2, 99999)))
-        print("rejection sampling: " + str(cloudnet.performRejectionSampling(sprinkler, given2, 999999)))
+        #print("rejection sampling: " + str(cloudnet.performRejectionSampling(sprinkler, given2, 999999)))
         print("gibbs sampling: " + str(cloudnet.performGibbsSampling(sprinkler, given2, 99999)))
 
 
