@@ -176,6 +176,7 @@ class BayesianNetwork(object):
         """ generated source for method performGibbsSampling """
         #  TODO
         num_query_sample = 1.0
+        total_sample = 0
         query_var_name = queryVar.getName()
         non_evidence_nodes = []
         # get all non evidence nodes
@@ -184,39 +185,64 @@ class BayesianNetwork(object):
                 # TODO: check this
                 non_evidence_nodes.append(self.varMap[var])
 
-        ### testing comments
-        print "non evidendce nodes:"
-        self.print_variable(non_evidence_nodes)
 
         # randomly assign non evidence variables
         curr_assign = self.random_initialize(non_evidence_nodes)
         # fix evidence variables
         for var in givenVars:
             curr_assign[var.getName()] = givenVars[var]
-        print "curr assignment: {}".format(curr_assign)
+
+        ### testing comments
+        #print "non evidendce nodes:"
+        #self.print_variable(non_evidence_nodes)
+        #print "curr assignment: {}".format(curr_assign)
 
         # gibs sampling
         for i in range(0, numTrials):
             for node in non_evidence_nodes:
                 var_name = node.variable.getName()
-                mb_list = self.markov_blanket(node)
-                mb_assign = self.get_mb_assignment(mb_list, curr_assign)
 
-                true_prob = node.getProbability(mb_assign, True)
+                mb_list = []
+                # iterate through both values since we don't know exact,
+                # but can normalize later on
+                for value in [True, False]:
+                    curr_assign[var_name] = value
+                    curr_prob = node.getProbability(curr_assign, value)
+                    for child in node.getChildren():
+                        child_name = child.variable.getName()
+                        curr_prob *= child.getProbability(curr_assign, curr_assign[child_name])
+                    mb_list.append(curr_prob)
+
+                mb_list = self.normalize(mb_list)
+
                 node_sample_prob = random.random()
-                if node_sample_prob <= true_prob:
+                node_prob = mb_list[0]
+
+                if node_sample_prob <= node_prob:
                     curr_assign[var_name] = True
                 else:
                     curr_assign[var_name] = False
 
+                ### testing comments
+                #print "current node: {}".format(var_name)
+                #print "curr assign: {}".format(curr_assign)
+                #print "mb list: {}".format(mb_list)
+                #print "node prob: {}".format(node_prob)
                 # print "curr non_evidence var: {}".format(var_name)
                 # print "markov assignment: {}".format(mb_assign)
                 # print "true prob: {}".format(true_prob)
 
-            if curr_assign[query_var_name]:
-                num_query_sample += 1
+                if curr_assign[query_var_name]:
+                    num_query_sample += 1
 
-        return num_query_sample/numTrials
+                total_sample += 1
+
+        return num_query_sample/total_sample
+
+    def normalize(self, prob_list):
+        norm_factor = reduce(lambda x, y: x+y, prob_list, 0.)
+
+        return map(lambda x: x/norm_factor, prob_list)
 
     def random_initialize(self, node_list):
         """
