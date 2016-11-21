@@ -154,6 +154,52 @@ class BayesianNetwork(object):
 
         return res
 
+    #performs probability calculations for P(queryVar=true|givenVars)
+    def normalizeW(self, W, queryVar):
+
+        queryVarTrueEvents, totalEvents = 0.0, 0.0
+
+        #print (queryVar.getName(),True)
+
+        #iterate over event, weight pairs in W
+        for x, w in W.items():
+
+            #print x, w
+            #Check if queryVar is true in event x, if so add 1 to count
+            if (queryVar.getName(),True) in x: queryVarTrueEvents += w
+
+            totalEvents += w
+
+        #print W
+        #print queryVarTrueEvents, totalEvents
+        return queryVarTrueEvents/totalEvents
+        #return 13
+
+    #sample the bayes network and return an event and a weight
+    def getWeigthedSample(self, givenVars):
+
+        w, assignments = 1., {}
+
+        for v in givenVars: assignments[v.getName()] = givenVars[v]
+        #print assignments
+
+        for var in sorted(self.varMap):
+
+            varName = var.getName()
+
+            rand = random.random()
+
+            if varName in assignments:
+                #get node associated with random variable, then get probability of that node
+                w *= self.varMap.get(var).getProbability(assignments, assignments[varName]) 
+            else:
+                if rand > self.varMap.get(var).getProbability(assignments, True):
+                    assignments[varName] = False
+                else:
+                    assignments[varName] = True
+
+        return frozenset(assignments.items()), w
+
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using weighted sampling
     #     * @param queryVar Query variable in probability query
@@ -163,7 +209,24 @@ class BayesianNetwork(object):
     def performWeightedSampling(self, queryVar, givenVars, numSamples):
         """ generated source for method performWeightedSampling """
         #  TODO
-        return 0
+
+        #print numSamples
+        #c1, c2 = 0,0
+        W = {}
+
+        for i in range(numSamples):
+
+            (x,w) = self.getWeigthedSample(givenVars)
+
+            if x in W: 
+                #c1 += 1
+                W[x] += w
+            else: 
+                #c2 += 1
+                W[x] = w
+
+        #print "c1 is: ",c1," and c2 is: ",c2
+        return self.normalizeW(W,queryVar)
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using Gibbs sampling
