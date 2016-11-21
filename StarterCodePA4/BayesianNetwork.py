@@ -148,9 +148,11 @@ class BayesianNetwork(object):
                     num_query_sample += 1
 
         res = (num_query_sample*1.0)/curr_num_sample
+        """ 
         print "number of query sample: {}".format(num_query_sample)
         print "total sample: {}".format(curr_num_sample)
         print "res: {}".format(res)
+        """
 
         return res
 
@@ -162,8 +164,49 @@ class BayesianNetwork(object):
     #     
     def performWeightedSampling(self, queryVar, givenVars, numSamples):
         """ generated source for method performWeightedSampling """
-        #  TODO
-        return 0
+        curr_num_sample = 0
+        num_query_sample = 0
+        top_order = self.get_topological_order()
+        queryVar_name = queryVar.getName()
+        queryVar_prob = None
+        weight_norm_a = 0
+        weight_norm_b = 0
+
+        while(curr_num_sample < numSamples):
+            # sample each variable topologically
+            # if the sampled evidence var does not match givenVars, reject
+            # flip coin based on cpt, p(x|parents(x))
+            assignment = {}
+            weight = 1.0
+
+            for node in top_order:
+                var_name = node.variable.getName()
+                true_prob = node.getProbability(assignment, True)
+                node_sample_prob = random.random()
+
+                if node.variable in givenVars:
+                    if givenVars[node.variable] == True:
+                        weight = weight * true_prob
+                        assignment[var_name] = True
+                    else:
+                        true_prob = node.getProbability(assignment, False)
+                        weight = weight * true_prob
+                        assignment[var_name] = False
+                else:
+                    # do a random sample
+                    if node_sample_prob <= true_prob:
+                        assignment[var_name] = True
+                    else:
+                        assignment[var_name] = False
+            
+            if assignment[queryVar_name] == True:
+                weight_norm_a += weight
+            else:
+                weight_norm_b += weight
+            curr_num_sample += 1
+        
+        # return (num_query_sample * 1.0)/numSamples
+        return weight_norm_a/(weight_norm_a + weight_norm_b)
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using Gibbs sampling
@@ -174,6 +217,86 @@ class BayesianNetwork(object):
     #     
     def performGibbsSampling(self, queryVar, givenVars, numTrials):
         """ generated source for method performGibbsSampling """
-        #  TODO
-        return 0
+        curr_num_sample = 0
+        num_query_sample = 0
+        top_order = self.get_topological_order()
+        queryVar_name = queryVar.getName()
+        nonevidence_var = []
+        queryVar_name = queryVar.getName()
+        
+        # set the current state
+        state = {}
+        for node in top_order:
+            var_name = node.variable.getName()
+            if node.variable in givenVars:
+                state[var_name] = givenVars[node.variable]
+            else:
+                coin_flip = random.random
+                coin_flip_prob = 0.5
+                if coin_flip <= coin_flip_prob:
+                    state[var_name] = True
+                else:
+                    state[var_name] = False
+                # add to nonevidence variable list
+                nonevidence_var.append(node)
+           
+
+        # now sample the nonevidence variables     
+        while(curr_num_sample < numTrials):
+            for node in nonevidence_var:
+                mb = self.markovBlanket(node)
+                var_name = node.variable.getName()
+                mb_assign = {}
+                # get the assignments for the mb variables
+                for mb_node in mb:
+                    var = mb_node.variable.getName()
+                    mb_assign[var] = state[var]
+                
+                mb_assign[var_name] = True
+                # state[var_name] = True
+                node_prob = node.getProbability(mb_assign, True)
+                for children in node.getChildren():
+                    node_prob = node_prob * children.getProbability(mb_assign,
+                        state[children.variable.getName()])
+                
+                mb_assign[var_name] = False
+                # state[var_name] = False
+                node_prob2 = node.getProbability(mb_assign, False)
+                for children in node.getChildren():
+                    node_prob2 = node_prob2 * children.getProbability(mb_assign,
+                      state[children.variable.getName()])
+
+                # normalize the node_prob and node_prob2
+                node_prob = node_prob / (node_prob + node_prob2)
+
+                sample_prob = random.random()
+                
+                if sample_prob <= node_prob:
+                    state[var_name] = True
+                else:
+                    state[var_name] = False
+
+                if state[queryVar_name]:
+                    num_query_sample += 1
+                curr_num_sample += 1
+       
+        ret_val = (num_query_sample*1.0)/numTrials
+        return ret_val
+
+    def markovBlanket(self, node):
+        mb = []
+        
+        """
+        mb.extend(node.getParents())
+        for parent in node.getParents():
+            for children in node.getChildren():
+                mb.append(children)
+        mb.extend(node.getChildren())
+        """
+        mb.extend(node.getParents())
+        mb.extend(node.getChildren())
+        for children in node.getChildren():
+            for parent in children.getParents():
+               mb.append(parent)
+        return mb
 
