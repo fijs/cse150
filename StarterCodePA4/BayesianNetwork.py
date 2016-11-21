@@ -94,13 +94,13 @@ class BayesianNetwork(object):
 
         return top_order
 
-    def print_variable(self, top_order):
+    def print_variable(self, node_list):
         """
-        testing whether top order was correct
-        :param top_order: list of node in topological order
+        given a node list, print var name in node
+        :param node_list: list of node
         :return: nothing
         """
-        for node in top_order:
+        for node in node_list:
             print node.variable.getName()
 
     #
@@ -112,7 +112,7 @@ class BayesianNetwork(object):
     def performRejectionSampling(self, queryVar, givenVars, numSamples):
         """ generated source for method performRejectionSampling """
         #  TODO
-        curr_num_sample = 0
+        curr_num_sample = 1.0
         num_query_sample = 0
         top_order = self.get_topological_order()
         queryVar_name = queryVar.getName()
@@ -155,6 +155,52 @@ class BayesianNetwork(object):
         """
 
         return res
+
+    #performs probability calculations for P(queryVar=true|givenVars)
+    def normalizeW(self, W, queryVar):
+
+        queryVarTrueEvents, totalEvents = 0.0, 0.0
+
+        #print (queryVar.getName(),True)
+
+        #iterate over event, weight pairs in W
+        for x, w in W.items():
+
+            #print x, w
+            #Check if queryVar is true in event x, if so add 1 to count
+            if (queryVar.getName(),True) in x: queryVarTrueEvents += w
+
+            totalEvents += w
+
+        #print W
+        #print queryVarTrueEvents, totalEvents
+        return queryVarTrueEvents/totalEvents
+        #return 13
+
+    #sample the bayes network and return an event and a weight
+    def getWeigthedSample(self, givenVars):
+
+        w, assignments = 1., {}
+
+        for v in givenVars: assignments[v.getName()] = givenVars[v]
+        #print assignments
+
+        for var in sorted(self.varMap):
+
+            varName = var.getName()
+
+            rand = random.random()
+
+            if varName in assignments:
+                #get node associated with random variable, then get probability of that node
+                w *= self.varMap.get(var).getProbability(assignments, assignments[varName]) 
+            else:
+                if rand > self.varMap.get(var).getProbability(assignments, True):
+                    assignments[varName] = False
+                else:
+                    assignments[varName] = True
+
+        return frozenset(assignments.items()), w
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using weighted sampling
@@ -207,6 +253,26 @@ class BayesianNetwork(object):
         
         # return (num_query_sample * 1.0)/numSamples
         return weight_norm_a/(weight_norm_a + weight_norm_b)
+        
+        #  TODO
+# 
+#         #print numSamples
+#         #c1, c2 = 0,0
+#         W = {}
+# 
+#         for i in range(numSamples):
+# 
+#             (x,w) = self.getWeigthedSample(givenVars)
+# 
+#             if x in W: 
+#                 #c1 += 1
+#                 W[x] += w
+#             else: 
+#                 #c2 += 1
+#                 W[x] = w
+# 
+#         #print "c1 is: ",c1," and c2 is: ",c2
+#         return self.normalizeW(W,queryVar)
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using Gibbs sampling
@@ -217,86 +283,202 @@ class BayesianNetwork(object):
     #     
     def performGibbsSampling(self, queryVar, givenVars, numTrials):
         """ generated source for method performGibbsSampling """
-        curr_num_sample = 0
-        num_query_sample = 0
-        top_order = self.get_topological_order()
-        queryVar_name = queryVar.getName()
-        nonevidence_var = []
-        queryVar_name = queryVar.getName()
-        
-        # set the current state
-        state = {}
-        for node in top_order:
-            var_name = node.variable.getName()
-            if node.variable in givenVars:
-                state[var_name] = givenVars[node.variable]
-            else:
-                coin_flip = random.random
-                coin_flip_prob = 0.5
-                if coin_flip <= coin_flip_prob:
-                    state[var_name] = True
-                else:
-                    state[var_name] = False
-                # add to nonevidence variable list
-                nonevidence_var.append(node)
-           
+#        curr_num_sample = 0
+#        num_query_sample = 0
+#        top_order = self.get_topological_order()
+#        queryVar_name = queryVar.getName()
+#        nonevidence_var = []
+#        queryVar_name = queryVar.getName()
+#        
+#        # set the current state
+#        state = {}
+#        for node in top_order:
+#            var_name = node.variable.getName()
+#            if node.variable in givenVars:
+#                state[var_name] = givenVars[node.variable]
+#            else:
+#                coin_flip = random.random
+#                coin_flip_prob = 0.5
+#                if coin_flip <= coin_flip_prob:
+#                    state[var_name] = True
+#                else:
+#                    state[var_name] = False
+#                # add to nonevidence variable list
+#                nonevidence_var.append(node)
+#           
+#
+#        # now sample the nonevidence variables     
+#        while(curr_num_sample < numTrials):
+#            for node in nonevidence_var:
+#                mb = self.markovBlanket(node)
+#                var_name = node.variable.getName()
+#                mb_assign = {}
+#                # get the assignments for the mb variables
+#                for mb_node in mb:
+#                    var = mb_node.variable.getName()
+#                    mb_assign[var] = state[var]
+#                
+#                mb_assign[var_name] = True
+#                # state[var_name] = True
+#                node_prob = node.getProbability(mb_assign, True)
+#                for children in node.getChildren():
+#                    node_prob = node_prob * children.getProbability(mb_assign,
+#                        state[children.variable.getName()])
+#                
+#                mb_assign[var_name] = False
+#                # state[var_name] = False
+#                node_prob2 = node.getProbability(mb_assign, False)
+#                for children in node.getChildren():
+#                    node_prob2 = node_prob2 * children.getProbability(mb_assign,
+#                      state[children.variable.getName()])
+#
+#                # normalize the node_prob and node_prob2
+#                node_prob = node_prob / (node_prob + node_prob2)
+#
+#                sample_prob = random.random()
+#                
+#                if sample_prob <= node_prob:
+#                    state[var_name] = True
+#                else:
+#                    state[var_name] = False
+#
+#                if state[queryVar_name]:
+#                    num_query_sample += 1
+#                curr_num_sample += 1
+#       
+#        ret_val = (num_query_sample*1.0)/numTrials
+#        return ret_val
+#
+#    def markovBlanket(self, node):
+#        mb = []
+#        
+#        """
+#        mb.extend(node.getParents())
+#        for parent in node.getParents():
+#            for children in node.getChildren():
+#                mb.append(children)
+#        mb.extend(node.getChildren())
+#        """
+#        mb.extend(node.getParents())
+#        mb.extend(node.getChildren())
+#        for children in node.getChildren():
+#            for parent in children.getParents():
+#               mb.append(parent)
+#        return mb
+        #  TODO
+        num_query_sample = 1.0
+        total_sample = 0
+        query_var_name = queryVar.getName()
+        non_evidence_nodes = []
+        # get all non evidence nodes
+        for var in self.varMap:
+            if var not in givenVars:
+                # TODO: check this
+                non_evidence_nodes.append(self.varMap[var])
 
-        # now sample the nonevidence variables     
-        while(curr_num_sample < numTrials):
-            for node in nonevidence_var:
-                mb = self.markovBlanket(node)
+
+        # randomly assign non evidence variables
+        curr_assign = self.random_initialize(non_evidence_nodes)
+        # fix evidence variables
+        for var in givenVars:
+            curr_assign[var.getName()] = givenVars[var]
+
+        ### testing comments
+        #print "non evidendce nodes:"
+        #self.print_variable(non_evidence_nodes)
+        #print "curr assignment: {}".format(curr_assign)
+
+        # gibs sampling
+        for i in range(0, numTrials):
+            for node in non_evidence_nodes:
                 var_name = node.variable.getName()
-                mb_assign = {}
-                # get the assignments for the mb variables
-                for mb_node in mb:
-                    var = mb_node.variable.getName()
-                    mb_assign[var] = state[var]
-                
-                mb_assign[var_name] = True
-                # state[var_name] = True
-                node_prob = node.getProbability(mb_assign, True)
-                for children in node.getChildren():
-                    node_prob = node_prob * children.getProbability(mb_assign,
-                        state[children.variable.getName()])
-                
-                mb_assign[var_name] = False
-                # state[var_name] = False
-                node_prob2 = node.getProbability(mb_assign, False)
-                for children in node.getChildren():
-                    node_prob2 = node_prob2 * children.getProbability(mb_assign,
-                      state[children.variable.getName()])
 
-                # normalize the node_prob and node_prob2
-                node_prob = node_prob / (node_prob + node_prob2)
+                mb_list = []
+                # iterate through both values since we don't know exact,
+                # but can normalize later on
+                for value in [True, False]:
+                    curr_assign[var_name] = value
+                    curr_prob = node.getProbability(curr_assign, value)
+                    for child in node.getChildren():
+                        child_name = child.variable.getName()
+                        curr_prob *= child.getProbability(curr_assign, curr_assign[child_name])
+                    mb_list.append(curr_prob)
 
-                sample_prob = random.random()
-                
-                if sample_prob <= node_prob:
-                    state[var_name] = True
+                mb_list = self.normalize(mb_list)
+
+                node_sample_prob = random.random()
+                node_prob = mb_list[0]
+
+                if node_sample_prob <= node_prob:
+                    curr_assign[var_name] = True
                 else:
-                    state[var_name] = False
+                    curr_assign[var_name] = False
 
-                if state[queryVar_name]:
+                ### testing comments
+                #print "current node: {}".format(var_name)
+                #print "curr assign: {}".format(curr_assign)
+                #print "mb list: {}".format(mb_list)
+                #print "node prob: {}".format(node_prob)
+                # print "curr non_evidence var: {}".format(var_name)
+                # print "markov assignment: {}".format(mb_assign)
+                # print "true prob: {}".format(true_prob)
+
+                if curr_assign[query_var_name]:
                     num_query_sample += 1
-                curr_num_sample += 1
-       
-        ret_val = (num_query_sample*1.0)/numTrials
-        return ret_val
 
-    def markovBlanket(self, node):
+                total_sample += 1
+
+        return num_query_sample/total_sample
+
+    def normalize(self, prob_list):
+        norm_factor = reduce(lambda x, y: x+y, prob_list, 0.)
+
+        return map(lambda x: x/norm_factor, prob_list)
+
+    def random_initialize(self, node_list):
+        """
+        randomly assign values to variable in node_list
+        by flipping a coin
+        :param node_list: list of nodes
+        :return:
+        """
+        rand_map = {}
+        for node in node_list:
+            var_name = node.variable.getName()
+            node_sample_prob = random.random()
+            if node_sample_prob < 0.5:
+                rand_map[var_name] = True
+            else:
+                rand_map[var_name] = False
+
+        return rand_map
+
+    def markov_blanket(self, node):
+        """
+        markov blanket of a node
+         1. parents of node
+         2. descendants of node
+         3. parents of descendants of node
+        :param var:
+        :return: list of nodes that are markov blanket of param node
+        """
         mb = []
-        
-        """
+        children = node.getChildren()
+        mb.extend(children)
         mb.extend(node.getParents())
-        for parent in node.getParents():
-            for children in node.getChildren():
-                mb.append(children)
-        mb.extend(node.getChildren())
-        """
-        mb.extend(node.getParents())
-        mb.extend(node.getChildren())
-        for children in node.getChildren():
-            for parent in children.getParents():
-               mb.append(parent)
+        for child in children:
+            mb.extend(child.getParents())
+
         return mb
 
+    def get_mb_assignment(self, node_list, curr_map):
+        """
+        a map with var_list assigned according to a_map
+        :return:
+        """
+        mb_map = {}
+        for node in node_list:
+            var_name = node.variable.getName()
+            mb_map[var_name] = curr_map[var_name]
+
+        return mb_map
