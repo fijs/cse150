@@ -37,24 +37,32 @@ class CloudyNetwork(object):
         #  Perform sampling tests
         #  ----------------------
         #  P(J=1|B=0,E=1) = TODO in writeup
-        print("Test 1")
-        given1 = {}
-        given1[rain]= True
-        given1[cloudy]=True
-        print("rejection sampling: " +str(cloudnet.performRejectionSampling(wetGrass, given1, 999999)))
-        print("weighted sampling: " + str(cloudnet.performWeightedSampling(wetGrass, given1, 99999)))
-        print("gibbs sampling: " + str(cloudnet.performGibbsSampling(wetGrass, given1, 99999)))
+        trial_list = [50, 100, 500, 1000, 5000, 10000]
+        #print("Test 1")
+        #given1 = {}
+        #given1[rain]= True
+        #given1[cloudy]=True
+
+        #for trial in trial_list:
+        #    print "Trial with number: {}".format(trial)
+        #    print("rejection sampling: " +str(cloudnet.performRejectionSampling(wetGrass, given1, trial)))
+        #    print("weighted sampling: " + str(cloudnet.performWeightedSampling(wetGrass, given1, trial)))
+        #    print("gibbs sampling: " + str(cloudnet.performGibbsSampling(wetGrass, given1, trial)))
+        #    print
         #  P(Rain=1|Sprinkler=1) = TODO in writeup
         print("Test 2")
         given2 = {}
         given2[rain]=True
-        print("weighted sampling: " + str(cloudnet.performWeightedSampling(sprinkler, given2, 99999)))
-        print("rejection sampling: " + str(cloudnet.performRejectionSampling(sprinkler, given2, 999999)))
-        print("gibbs sampling: " + str(cloudnet.performGibbsSampling(sprinkler, given2, 99999)))
+        for trial in trial_list:
+            print "Trial with number: {}".format(trial)
+            print("weighted sampling: " + str(cloudnet.performWeightedSampling(sprinkler, given2, trial)))
+            print("rejection sampling: " + str(cloudnet.performRejectionSampling(sprinkler, given2, trial)))
+            print("gibbs sampling: " + str(cloudnet.performGibbsSampling(sprinkler, given2, trial)))
+            print
 
 
 if __name__ == '__main__':
     import sys
     CloudyNetwork.main(sys.argv)
 import sys
-CloudyNetwork.main(sys.argv)
+#CloudyNetwork.main(sys.argv)

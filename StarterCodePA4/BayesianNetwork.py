@@ -254,25 +254,24 @@ class BayesianNetwork(object):
         # return (num_query_sample * 1.0)/numSamples
         return weight_norm_a/(weight_norm_a + weight_norm_b)
         
-        #  TODO
-# 
-#         #print numSamples
-#         #c1, c2 = 0,0
-#         W = {}
-# 
-#         for i in range(numSamples):
-# 
-#             (x,w) = self.getWeigthedSample(givenVars)
-# 
-#             if x in W: 
-#                 #c1 += 1
-#                 W[x] += w
-#             else: 
-#                 #c2 += 1
-#                 W[x] = w
-# 
-#         #print "c1 is: ",c1," and c2 is: ",c2
-#         return self.normalizeW(W,queryVar)
+        # ISSAC old work
+        # #print numSamples
+        # #c1, c2 = 0,0
+        # W = {}
+
+        # for i in range(numSamples):
+
+        #     (x,w) = self.getWeigthedSample(givenVars)
+
+        #     if x in W:
+        #         #c1 += 1
+        #         W[x] += w
+        #     else:
+        #         #c2 += 1
+        #        W[x] = w
+
+        #print "c1 is: ",c1," and c2 is: ",c2
+        #return self.normalizeW(W,queryVar)
 
     # 
     #     * Returns an estimate of P(queryVal=true|givenVars) using Gibbs sampling

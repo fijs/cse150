@@ -65,9 +65,14 @@ class SalmonNetwork(object):
         given1[xray]=True
         given1[dispnea]=False
 
-        print("rejection sampling: " +str(salmon_run.performRejectionSampling(tb, given1, 999999)))
-        print("weighted sampling: " + str(salmon_run.performWeightedSampling(tb, given1, 99999)))
-        print("gibbs sampling: " + str(salmon_run.performGibbsSampling(tb, given1, 99999)))
+        trial_list = [50, 100, 500, 1000, 5000, 10000]
+        for trial in trial_list:
+            print "Trial with number: {}".format(trial)
+            print("rejection sampling: " +str(salmon_run.performRejectionSampling(tb, given1, trial)))
+            print("weighted sampling: " + str(salmon_run.performWeightedSampling(tb, given1, trial)))
+            # gibbs sampling does not work with CPT of 0
+            # print("gibbs sampling: " + str(salmon_run.performGibbsSampling(tb, given1, trial)))
+            print
 
 
 
