@@ -6,7 +6,7 @@ def value_iteration():
     actions = ["north", "east", "south", "west"]
     rewards = p.read_rewards()
     state_map = p.read_transition_prob()
-    discount = 0.5
+    discount = 0.9
     max_util_change = -1
 
     util = {}
@@ -18,6 +18,8 @@ def value_iteration():
     while max_util_change != 0:
         #print "max_util_change: {}".format(max_util_change)
         #sys.stderr.write(".")
+        
+        max_util_change = 0
         for key, val in new_util.iteritems():
             util[key] = val
 
@@ -41,7 +43,44 @@ def value_iteration():
 
     return new_util
 
+def optimal_policy(util):
+    policy = {}
+    actions = ["north", "east", "south", "west"]
+    state_map = p.read_transition_prob()
+    
+    for _, state in state_map.iteritems():
+        state_name = state.name
+
+        action_util = -sys.maxint
+        policy_action = None
+        for action in actions:
+            curr_score = 0.
+            t_map = state.transition_map[action]
+            for next_s, prob in t_map.trans_prob.iteritems():
+                curr_score += prob*util[next_s]
+
+            # we can ignore states with Util = 0 since its a wall
+            if curr_score > action_util and curr_score > 0.:
+                policy_action = action
+                action_util = curr_score
+                policy[state_name] = policy_action        
+    
+    return policy           
+
+def pprint_policy(util, policy):
+    policy_list = []
+    for state, policy in policy.iteritems():
+        value = util[state]
+
+        policy_list.append((state, value, policy.upper()))
+    
+    for tuple in policy_list:
+        print tuple
+        
+
 if __name__ == "__main__":
     #pprint(state_map)
     utils = value_iteration()
+    policy = optimal_policy(utils)
     print utils
+    pprint_policy(utils, policy)
