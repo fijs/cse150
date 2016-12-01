@@ -9,6 +9,8 @@ def value_iteration():
     discount = 0.5
     max_util_change = -1
 
+    print "rewards: \n", rewards
+
     util = {}
     new_util = {}
     for i in range(1, 82):
@@ -16,10 +18,9 @@ def value_iteration():
         new_util[i] = 0
 
     while max_util_change != 0:
-        #print "max_util_change: {}".format(max_util_change)
-        #sys.stderr.write(".")
         for key, val in new_util.iteritems():
             util[key] = val
+        max_util_change = 0
 
         for _, state in state_map.iteritems():
             state_name = state.name
@@ -32,14 +33,19 @@ def value_iteration():
                     curr_score += prob*util[next_s]
 
                 action_util = max(action_util, curr_score)
-            #print "action_util:{}, curr_state: {}".format(action_util, state_name)
 
             new_util[state_name] = rewards[state_name] + discount*action_util
             util_change = abs(new_util[state.name] - util[state.name])
             if util_change > max_util_change:
                 max_util_change = util_change
+            #print "action_util:{}, curr_state: {}".format(action_util, state_name)
+            #print "max_util_change: {}".format(max_util_change)
+            #sys.stderr.write(".")
 
     return new_util
+
+
+
 
 if __name__ == "__main__":
     #pprint(state_map)
