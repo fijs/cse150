@@ -1,4 +1,6 @@
-# structure later
+# structures
+# State contains a map, which maps direction to TransitionProb
+# TransitionProb contains a map, which maps next state to prob
 class State(object):
     transition_map = None
     name = None
@@ -22,6 +24,11 @@ class TransitionProb(object):
         self.direction = direction
 
 def pprint(state_map):
+    """
+    print the state map prettily
+    :param state_map:
+    :return:
+    """
     for _, state in state_map.iteritems():
         tp_map = state.transition_map
         for action in tp_map:
@@ -44,6 +51,9 @@ def read_transition_prob():
         for line in input_file:
             (curr_s, next_s, prob) = line.split()
             #print "curr_s: {}, next_s: {}, prob: {}".format(curr_s, next_s, prob)
+            curr_s = int(curr_s)
+            next_s = int(next_s)
+            prob = float(prob)
 
             if curr_s not in state_map:
                 state_map[curr_s] = State(curr_s)
@@ -70,7 +80,7 @@ def read_rewards():
 
 if __name__ == "__main__":
     state_map = read_transition_prob()
-    #pprint(state_map)
+    pprint(state_map)
     rewards = read_rewards()
     print rewards
 
